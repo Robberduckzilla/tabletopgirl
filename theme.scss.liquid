@@ -3781,6 +3781,15 @@ $color-blankstate-background: rgba($color-body-text, 0.1);
     &:focus {
       opacity: $opacity-link-hover;
     }
+
+    // next 6 lines - added to disable margins when the button is hidden (to prevent awkward spacing)
+    &[aria-disabled="true"]{
+      	display: none;
+    }
+    &[aria-disabled="false"]{
+      	display: block;
+    }
+
   }
 }
 
