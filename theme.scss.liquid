@@ -1610,6 +1610,7 @@ li {
 .mega-title,
 .mega-subtitle {
   color: $color-overlay-title-text;
+  text-align: left;
   .hero & {
   //  text-shadow: 0 0 4px $color-text-shadow;
   }
@@ -1620,6 +1621,7 @@ li {
 
 .mega-title {
   margin-bottom: 8px;
+
 }
 
 .mega-title--large {
@@ -1634,10 +1636,6 @@ li {
   @include media-query($medium-up) {
     font-size: em($font-size-base + 4);
     margin: 0 auto;
-
-    .text-center & {
-      max-width: 75%;
-    }
   }
 
   p {
@@ -7528,6 +7526,7 @@ $toolbar-height-small: 46px;
 
 .hero__btn {
   margin-top: $section-spacing / 2;
+  float: left;
 }
 
 /*================ Fixed width ================*/
