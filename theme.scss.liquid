@@ -476,6 +476,7 @@ $section-spacing-small: 35px;
 $border-radius: 2px;
 $icon-size: 20px;
 $connected-submit-size: $icon-size * 2.5;
+$isabelle-spacing-ratio: 1.5;
 
 /*================ Footer Variables ================*/
 $footer-spacing-extra-small: 5px;
@@ -4119,17 +4120,18 @@ $color-blankstate-background: rgba($color-body-text, 0.1);
   margin-bottom: $gutter-site-mobile;
 
   @include media-query($medium-up) {
-    margin-bottom: $section-spacing-small;
+    margin-bottom: $section-spacing-small * $isabelle-spacing-ratio;
   }
 }
 
 .collection-description {
   margin-bottom: $gutter-site-mobile;
   margin-top: $gutter-site-mobile;
+  padding-bottom: $section-spacing-small * $isabelle-spacing-ratio;
 
   @include media-query($medium-up) {
-    margin-bottom: $section-spacing-small;
-    margin-top: $section-spacing-small;
+    margin-bottom: $section-spacing-small * $isabelle-spacing-ratio;
+    margin-top: $section-spacing-small / 4;
   }
 }
 
