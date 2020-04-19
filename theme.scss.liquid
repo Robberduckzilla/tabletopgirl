@@ -2712,8 +2712,8 @@ textarea {
 
 
 .page-width {
-  padding-left: $gutter-site;
-  padding-right: $gutter-site;
+  padding-left: $gutter-site /2;
+  padding-right: $gutter-site /2;
 
   @include media-query($small) {
     padding-left: $gutter-site-mobile;
@@ -4157,7 +4157,7 @@ $color-blankstate-background: rgba($color-body-text, 0.1);
 }
 
 .collection-hero__title {
-  position: absolute;
+  position: block;
   color: $color-overlay-title-text;
   width: 100%;
   text-align: center;
