@@ -1,7 +1,9 @@
 <div class="page-width">
   <header class="section-header text-center">
     <h1>{{ page_title }}</h1>
-  <a href="/collections/all" class="btn hero__btn" aria-label="View all products: Catalog">View all the things..</a>
+    <div class="collection_button_center">
+      <a href="/collections/all" class="btn hero__btn_center" aria-label="View all products: Catalog">View all products</a>
+    </div>
   </header>
 
   {%- assign blocks = section.blocks | sort: 'collection.all_products_count' -%}
