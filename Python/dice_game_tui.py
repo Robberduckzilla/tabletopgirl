@@ -72,6 +72,7 @@ def process_commands(stdscr, key):
             start_rot = None
             end_rot = None
             cursor_pos = (1,1)
+            dice_game.blocked_squares = set()
 
             stdscr.clear()
             draw_grid(stdscr)
