@@ -509,6 +509,8 @@ def generate_map(pair_count, add_block=True, retry_count=100, min_length=3, stri
 
             blocked_squares = {block_pos}
             solutions = solve_pairs(pairs)
+            if solutions is False:
+                continue
         
         # Assuming we reach here, a valid map has been acheived!
         break
@@ -529,7 +531,7 @@ def generate_map(pair_count, add_block=True, retry_count=100, min_length=3, stri
     dice = [dice_to_dict(d) for d in dice]
     pairs = list(zip(dice[0::2],dice[1::2]))
 
-    return {"pairs": pairs, "solutions": solutions, "blocks": blocked_squares.copy()}
+    return {"pairs": pairs, "solutions": solutions, "blocks": tuple(blocked_squares)}
 
 
 if __name__ == "__main__":
