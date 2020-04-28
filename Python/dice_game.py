@@ -106,7 +106,7 @@ def get_dice_face(orientation, position):
             return face
 
     # If we've reached here, something's wrong!
-    raise ValueError(f"Face not found at position {orig_position}.")
+    raise ValueError(f"Face not found at position {orig_position}. This shouldn't happen.")
 
 def get_dice_orientation(face1, pos1, face2=0, pos2=None):
     """
@@ -278,10 +278,45 @@ def generate_paths(start, end):
 
             yield from gen_paths_recursive(path, r)
 
-def generate_solution_paths(start, end, rotation):
-    # There should be some check in here to stop immediately if we can prove
-    #  no solutions are possible via parity arguments
-    return (p for p in generate_paths(start,end) if np.array_equal(calculate_path_rotation(p), rotation))
+def calc_rotation_parity(rotation):
+    """
+    Calculates the parity (0 or 1) of the given rotation permutation.
+    """
+    # Initial position of numbers 1-6
+    start = list(RIGHT_HANDED_DICE.values())
+
+    end = list((rotation @ np.array(start).T).T)
+
+    permutation = np.array([[np.array_equal(s,e) for s in start] for e in end],dtype=int)
+    sign = int(np.linalg.det(permutation))
+
+    return (1-sign)//2
+
+def generate_solution_paths(start_pos, end_pos, start_rot, end_rot):
+    """
+    Returns valid paths, including matching rotations, for given start and
+    end positions. For paths with bad parity, immediately return.
+    Returns as a generator.
+    """
+    rotation = end_rot @ start_rot.T
+
+    #Check valid rotation
+    valid = (True
+        and (np.array_equal(rotation.T @ rotation, np.identity(3,dtype=int)))
+        and (rotation.dtype is np.dtype(int))
+        and (int(np.linalg.det(rotation)) == 1)
+        )
+
+    if not valid:
+        raise ValueError("Invalid rotation given")
+
+    rot_parity = calc_rotation_parity(rotation)
+    dist_parity = (sum(start_pos) + sum(end_pos)) % 2
+
+    if rot_parity != dist_parity:
+        raise ValueError("Non-matching parity")
+
+    return (p for p in generate_paths(start_pos,end_pos) if np.array_equal(calculate_path_rotation(p), rotation))
 
 if __name__ == "__main__":
     for p in generate_paths(start_default,end_default):

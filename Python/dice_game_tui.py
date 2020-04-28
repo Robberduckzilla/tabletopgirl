@@ -46,8 +46,8 @@ def process_commands(stdscr, key):
     filled_pos = {start_pos, end_pos}.union(dice_game.blocked_squares)
     empty_sq = cursor_pos not in filled_pos
 
-    stdscr.addstr(20,50,' '*10)
-    stdscr.addstr(20,50,key)
+    stdscr.addstr(15,dice_game.GRID_SIZE * 6 + 4,' '*10)
+    stdscr.addstr(15,dice_game.GRID_SIZE * 6 + 4,key)
     
     if key == 's':
         if empty_sq:
@@ -126,9 +126,13 @@ def process_commands(stdscr, key):
     elif key == ' ':
         if ((start_pos is not None) and (start_rot is not None) 
             and (end_pos is not None) and (end_rot is not None)):
-            rotation = end_rot @ start_rot.T
 
-            solutions = dice_game.generate_solution_paths(start_pos, end_pos, rotation)
+            try:
+                solutions = dice_game.generate_solution_paths(
+                        start_pos, end_pos, start_rot, end_rot)
+            except ValueError as e:
+                solutions = e.args
+
             draw_solutions(stdscr, solutions, 20)
 
     elif key == 'q':
@@ -139,7 +143,7 @@ def process_commands(stdscr, key):
 
 def draw_solutions(stdscr, solutions, maximum):
     x = dice_game.GRID_SIZE * 6 + 30
-    stdscr.addstr(1, x, "Solutions")
+    stdscr.addstr(1, x, "Solutions:")
 
     for i in range(maximum+1):
         stdscr.addstr(2+i, x, ' '*20)
