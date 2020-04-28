@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+from random import randint, choice
 
 # Assuming a square grid of this size.
 GRID_SIZE = 4
@@ -20,7 +21,6 @@ rotation_default = np.array([
 
 # Define squares we can't access
 blocked_squares = set()
-# blocked_squares.add((2,3))
 
 # Direction names
 DIRECTIONS = ('N','S','E','W')
@@ -93,7 +93,19 @@ LEFT_HANDED_DICE = {
         }
 
 DICE = LEFT_HANDED_DICE
-DICE_CHIRALITY = 'L'
+
+"""
+Mapping from a face, to the face above when viewed such that the text
+is upright.
+"""
+DICE_FACES_ABOVE = {
+    1 : 5,
+    2 : 1,
+    3 : 1,
+    4 : 1,
+    5 : 1,
+    6 : 2
+    }
 
 def get_dice_face(orientation, position):
     """
@@ -124,7 +136,7 @@ def get_dice_orientation_front(face):
     direction.
     """
     orig_position = DICE[face]
-    front_position = np.array((0,0,1))
+    #front_position = np.array((0,0,1))
 
     orientation = np.zeros((3,3),dtype=int)
     # Now set element of orientation s.t.
@@ -292,6 +304,9 @@ def calc_rotation_parity(rotation):
 
     return (1-sign)//2
 
+class ParityError(Exception):
+    pass
+
 def generate_solution_paths(start_pos, end_pos, start_rot, end_rot):
     """
     Returns valid paths, including matching rotations, for given start and
@@ -314,14 +329,212 @@ def generate_solution_paths(start_pos, end_pos, start_rot, end_rot):
     dist_parity = (sum(start_pos) + sum(end_pos)) % 2
 
     if rot_parity != dist_parity:
-        raise ValueError("Non-matching parity")
+        raise ParityError("Bad parity")
 
     return (p for p in generate_paths(start_pos,end_pos) if np.array_equal(calculate_path_rotation(p), rotation))
 
+
+def generate_random_dice():
+    face = choice(tuple(DICE.keys()))
+    orientation = np.linalg.matrix_power(ROTATION_CLOCKWISE,randint(0,3)) @ get_dice_orientation_front(face)
+
+    x = randint(1,GRID_SIZE)
+    y = randint(1,GRID_SIZE)
+    position = (x,y)
+
+    return position, orientation
+    
+
+def generate_multiple_random_dice(n):
+    """:("""
+
+    positions = set()
+    dices = []
+
+    while len(dices) < n:
+        p,o = generate_random_dice()
+        if p not in positions:
+            positions.add(p)
+            dices.append((p,o))
+    
+    return dices
+
+
+def calculate_face_rotation(orientation):
+
+    # Get face facing towards us (that we can see)
+    face = get_dice_face(orientation, (0,0,1))
+    # The face directly above our chosen face (when the text is upright)
+    face_above = DICE_FACES_ABOVE[face]
+
+    face_above_position = orientation @ DICE[face_above]
+    # face_above_position can only be one of: (1,0,0), (0,1,0), (-1,0,0), (0,-1,0)
+    x, y, _ = face_above_position
+    angle = np.degrees(np.arctan2(x,y))
+
+    return face, angle
+    
+
+def get_path_coordinates(start_pos, path):
+    """
+    Converts a start position (2,3), and path NWSSS to a list of squares
+    [(2,3),(2,4),(1,4),(1,3),(1,2),(1,1)]
+    """
+
+    pos = start_pos
+    coords = [start_pos]
+
+    for step in path:
+        i = DIRECTIONS.index(step)
+        
+        if i == 0:
+            y=pos[1]+1
+            pos = (pos[0], y)
+        elif i == 1:
+            y = pos[1]-1
+            pos = (pos[0], y)
+        elif i == 2:
+            x = pos[0]+1
+            pos = (x, pos[1])
+        else:
+            x = pos[0]-1
+            pos = (x, pos[1])
+
+        coords.append(pos)
+    
+    return coords
+
+
+def generate_map(pair_count, add_block=True, retry_count=100, min_length=3, strict_impossible=True):
+    """
+    Generates plans for a full grid. Output format:
+    {
+        "pairs": [
+            (
+                {pos: (3,3), face: 3, angle: 90}, # start
+                {pos: (4,4), face: 5, angle: 0} # end
+            ),
+            ...
+            # more starts+ends
+        ],
+        "solutions": [
+            (3,3),(2,3),(2,4),(3,4),(4,4)
+            ...
+            # more paths, False if no possible path
+        ],
+        "blocks" {
+            (2,2),
+            ...
+        }
+    }
+    
+    If strict_impossible is set to true, then we reject pairs where we cannot
+    find solutions, nor prove there are no solutions.
+    """
+    global blocked_squares
+
+    def solve_pairs(pairs):
+        # Solve, find shortest solutions
+        solutions = []
+        nonlocal strict_impossible
+
+        for start,end in pairs:
+            try:
+                paths = generate_solution_paths(start[0], end[0], start[1], end[1])
+                shortest_path = next(paths)
+                solutions.append(shortest_path)
+            except ParityError:
+                # Bad parity, we know no solutions exist
+                solutions.append(False)
+            except StopIteration:
+                # Parity is correct, but no solutions have been found.
+                if strict_impossible:
+                    # Reject map, start again.
+                    return False
+                else:
+                    solutions.append(False)
+
+        return solutions
+
+
+    for i in range(retry_count):
+        # After so many failed attempts, we give up. This should help prevent
+        #  accidental infinite loops
+
+        # Generate some pairs
+        dice = generate_multiple_random_dice(2*pair_count)
+        pairs = list(zip(dice[0::2],dice[1::2]))
+        blocked_squares = set()
+        
+        solutions = solve_pairs(pairs)
+        if solutions is False:
+            continue
+
+        # Accept/reject pairs
+        shortest_path = None
+        shortest_length = np.inf
+
+        for i, solution in enumerate(solutions):
+            if (solution != False) and (len(solution) < shortest_length):
+                shortest_path = i
+                shortest_length = len(solution)
+
+
+        if shortest_path is not None:
+            # At least one route is valid
+
+            if shortest_length < min_length:
+                # One of the paths is too short, reject map
+                continue
+
+            if add_block:
+                # Attempt to find a space to place a block, on the shortest
+                # path, but not on another dice.
+                path_coords = get_path_coordinates(pairs[shortest_path][0][0], solutions[shortest_path])
+                dice_coords = {d[0] for d in dice}
+
+                possible_blocks = [p for p in path_coords if p not in dice_coords]
+        else:
+            if add_block:
+                dice_coords = {d[0] for d in dice}
+                empty_coords = ((x+1,y+1) for x in range(GRID_SIZE) for y in range(GRID_SIZE))
+                possible_blocks = [p for p in empty_coords if p not in dice_coords]
+                
+        if add_block:
+            if len(possible_blocks) > 0:
+                block_pos = choice(possible_blocks)
+            else:
+                # No valid positions, to place blocks, emergency abort!
+                continue
+
+            blocked_squares = {block_pos}
+            solutions = solve_pairs(pairs)
+        
+        # Assuming we reach here, a valid map has been acheived!
+        break
+
+    else:
+        print(f"ERR: No valid map found after {retry_count} tries, aborting.")
+        return False
+    
+    # Now, convert tp correct output format.
+    solutions = [get_path_coordinates(pairs[i][0][0], solutions[i]) if (solutions[i] != False) else False for i in range(pair_count) ]
+
+    def dice_to_dict(dice):
+        # (pos, rot) -> {pos: ..., face: ..., angle: ...}
+        pos, rot = dice
+        face, angle = calculate_face_rotation(rot)
+        return {"pos": pos, "face": face, "angle": angle}
+    
+    dice = [dice_to_dict(d) for d in dice]
+    pairs = list(zip(dice[0::2],dice[1::2]))
+
+    return {"pairs": pairs, "solutions": solutions, "blocks": blocked_squares.copy()}
+
+
 if __name__ == "__main__":
+    blocked_squares.add((2,3))
     for p in generate_paths(start_default,end_default):
         e = np.array_equal(calculate_path_rotation(p), rotation_default)
         if e:
-            #print(e)
             print(p)
-            #print(calculate_rotation(p))

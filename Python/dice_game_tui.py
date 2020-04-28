@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import dice_game
+from dice_game import ParityError
 import curses
 from curses import wrapper
 
@@ -88,12 +89,10 @@ def process_commands(stdscr, key):
             dice_game.blocked_squares.add(cursor_pos)
 
     elif key == 'c':
-        if dice_game.DICE_CHIRALITY == 'L':
-            dice_game.DICE_CHIRALITY = 'R'
+        if dice_game.DICE is dice_game.LEFT_HANDED_DICE:
             dice_game.DICE = dice_game.RIGHT_HANDED_DICE
 
         else:
-            dice_game.DICE_CHIRALITY = 'L'
             dice_game.DICE = dice_game.LEFT_HANDED_DICE
 
     elif key in (str(i) for i in range(1,7)):
@@ -131,7 +130,7 @@ def process_commands(stdscr, key):
             try:
                 solutions = dice_game.generate_solution_paths(
                         start_pos, end_pos, start_rot, end_rot)
-            except ValueError as e:
+            except ParityError as e:
                 solutions = e.args
 
             draw_solutions(stdscr, solutions, 20)
