@@ -351,6 +351,9 @@ def generate_multiple_random_dice(n):
     positions = set()
     dices = []
 
+    if n > (GRID_SIZE**2):
+        # Trying to generate more dice than grid spaces...
+        raise ValueError(f"Not enough space for {n} dice in a {GRID_SIZE}x{GRID_SIZE} grid.")
     while len(dices) < n:
         p,o = generate_random_dice()
         if p not in positions:
