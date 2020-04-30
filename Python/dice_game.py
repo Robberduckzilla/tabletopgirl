@@ -436,6 +436,13 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
     """
     global blocked_squares
 
+    class InvalidMapError(Exception):
+        """
+        Raised whenever a map has violated design constraints.
+        """
+        pass
+
+
     def solve_pairs():
         """
         Solve pairs, find shortest solution.
@@ -462,11 +469,9 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
                 if strict_impossible:
                     # Reject map, start again.
                     solutions = False
-                    return False
+                    raise InvalidMapError("strict_impossible condition violated.")
                 else:
                     solutions.append(False)
-
-        return True
 
     def add_block():
         """
@@ -481,7 +486,7 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
         global blocked_squares
 
         if solutions is False:
-            return False
+            raise InvalidMapError("No solutions to work from.")
 
         shortest_path = find_shortest_path()[0]
         dice_coords = {d[0] for d in dice}
@@ -502,10 +507,9 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
         if len(possible_blocks) > 0:
             block_pos = choice(possible_blocks)
             blocked_squares.add(block_pos)
-            return True
         else:
             # No valid positions, to place blocks, emergency abort!
-            return False
+            raise InvalidMapError("No space to add blocks.")
 
     def find_shortest_path():
         """
@@ -515,7 +519,7 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
         nonlocal solutions
 
         if solutions is False:
-            return (None, np.inf)
+            raise InvalidMapError("No solutions to work from.")
 
         # Find shortest path, for map validation and adding blockers
         shortest_path = None
@@ -533,24 +537,25 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
         # After so many failed attempts, we give up. This should help prevent
         #  accidental infinite loops for bad configurations.
 
-        # Generate some pairs
-        dice = generate_multiple_random_dice(2*pair_count)
-        pairs = list(zip(dice[0::2],dice[1::2]))
-        solutions = []
+        try:
+            # Generate some pairs
+            dice = generate_multiple_random_dice(2*pair_count)
+            pairs = list(zip(dice[0::2],dice[1::2]))
+            solutions = []
 
-        if solve_pairs() is False:
-            # Solution has blocked path with good parity, and strict_impossible
-            #  is true, so reject map
-            continue
+            solve_pairs()
 
-        if find_shortest_path()[1] < min_length:
-            # One of the paths is too short, reject map
-            continue
+            if find_shortest_path()[1] < min_length:
+                raise InvalidMapError("Solution path too short.")
 
-        blocked_squares = set()
+            blocked_squares = set()
 
-        # Repeatedly add blocks, and keep checking graph is valid
-        if all((all((add_block(),solve_pairs())) for _ in range(blocks))) is False:
+            for _ in range(blocks):
+                add_block()
+                solve_pairs()
+
+        except InvalidMapError:
+            # Reject map, retry.
             continue
         
         # Assuming we reach here, a valid map has been acheived!
@@ -562,7 +567,11 @@ def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_imp
         return False
     
     # Now, convert to correct output format.
-    solutions = [get_path_coordinates(pairs[i][0][0], solutions[i]) if (solutions[i] != False) else False for i in range(pair_count) ]
+    solutions = [
+            get_path_coordinates(pairs[i][0][0], solutions[i]) 
+            if (solutions[i] != False) else False 
+            for i in range(pair_count)
+            ]
 
     def dice_to_dict(dice):
         # (pos, rot) -> {pos: ..., face: ..., angle: ...}
