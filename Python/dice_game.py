@@ -408,7 +408,7 @@ def get_path_coordinates(start_pos, path):
     return coords
 
 
-def generate_map(pair_count, add_block=True, retry_count=100, min_length=3, strict_impossible=True):
+def generate_map(pair_count, blocks=0, retry_count=100, min_length=3, strict_impossible=True):
     """
     Generates plans for a full grid. Output format:
     {
@@ -436,44 +436,92 @@ def generate_map(pair_count, add_block=True, retry_count=100, min_length=3, stri
     """
     global blocked_squares
 
-    def solve_pairs(pairs):
+    class InvalidMapError(Exception):
+        """
+        Raised whenever a map has violated design constraints.
+        """
+        pass
+
+
+    def solve_pairs():
+        """
+        Solve pairs, find shortest solution.
+        Returns True/False on success/failure
+        """
         # Solve, find shortest solutions
-        solutions = []
+        nonlocal pairs
         nonlocal strict_impossible
+        nonlocal solutions
+        solutions = []
 
         for start,end in pairs:
             try:
                 paths = generate_solution_paths(start[0], end[0], start[1], end[1])
                 shortest_path = next(paths)
                 solutions.append(shortest_path)
+
             except ParityError:
                 # Bad parity, we know no solutions exist
                 solutions.append(False)
+
             except StopIteration:
                 # Parity is correct, but no solutions have been found.
                 if strict_impossible:
                     # Reject map, start again.
-                    return False
+                    solutions = False
+                    raise InvalidMapError("strict_impossible condition violated.")
                 else:
                     solutions.append(False)
 
-        return solutions
+    def add_block():
+        """
+        Attempts to add a blocker to the current map.
+        If there are possible solution paths, the block will be placed on
+        the shortest path if possible. Else, the block will be placed randomly.
 
+        Returns True if successful, False if unsuccessful.
+        """
+        nonlocal solutions
+        nonlocal dice
+        global blocked_squares
 
-    for i in range(retry_count):
-        # After so many failed attempts, we give up. This should help prevent
-        #  accidental infinite loops
-
-        # Generate some pairs
-        dice = generate_multiple_random_dice(2*pair_count)
-        pairs = list(zip(dice[0::2],dice[1::2]))
-        blocked_squares = set()
-        
-        solutions = solve_pairs(pairs)
         if solutions is False:
-            continue
+            raise InvalidMapError("No solutions to work from.")
 
-        # Accept/reject pairs
+        shortest_path = find_shortest_path()[0]
+        dice_coords = {d[0] for d in dice}
+
+        if shortest_path is not None:
+            # At least one route is valid
+
+            # Attempt to find a space to place a block, on the shortest
+            # path, but not on another dice.
+            path_coords = get_path_coordinates(pairs[shortest_path][0][0], solutions[shortest_path])
+
+            possible_blocks = [p for p in path_coords if p not in dice_coords]
+        else:
+            # All routes blocked
+            empty_coords = ((x+1,y+1) for x in range(GRID_SIZE) for y in range(GRID_SIZE))
+            possible_blocks = [p for p in empty_coords if p not in dice_coords]
+                
+        if len(possible_blocks) > 0:
+            block_pos = choice(possible_blocks)
+            blocked_squares.add(block_pos)
+        else:
+            # No valid positions, to place blocks, emergency abort!
+            raise InvalidMapError("No space to add blocks.")
+
+    def find_shortest_path():
+        """
+        Returns the index and length of the shortest path.
+        If there are no solutions, returns (None, np.inf)
+        """
+        nonlocal solutions
+
+        if solutions is False:
+            raise InvalidMapError("No solutions to work from.")
+
+        # Find shortest path, for map validation and adding blockers
         shortest_path = None
         shortest_length = np.inf
 
@@ -482,48 +530,48 @@ def generate_map(pair_count, add_block=True, retry_count=100, min_length=3, stri
                 shortest_path = i
                 shortest_length = len(solution)
 
+        return shortest_path, shortest_length
+        
 
-        if shortest_path is not None:
-            # At least one route is valid
+    for i in range(retry_count):
+        # After so many failed attempts, we give up. This should help prevent
+        #  accidental infinite loops for bad configurations.
 
-            if shortest_length < min_length:
-                # One of the paths is too short, reject map
-                continue
+        try:
+            # Generate some pairs
+            dice = generate_multiple_random_dice(2*pair_count)
+            pairs = list(zip(dice[0::2],dice[1::2]))
+            solutions = []
 
-            if add_block:
-                # Attempt to find a space to place a block, on the shortest
-                # path, but not on another dice.
-                path_coords = get_path_coordinates(pairs[shortest_path][0][0], solutions[shortest_path])
-                dice_coords = {d[0] for d in dice}
+            solve_pairs()
 
-                possible_blocks = [p for p in path_coords if p not in dice_coords]
-        else:
-            if add_block:
-                dice_coords = {d[0] for d in dice}
-                empty_coords = ((x+1,y+1) for x in range(GRID_SIZE) for y in range(GRID_SIZE))
-                possible_blocks = [p for p in empty_coords if p not in dice_coords]
-                
-        if add_block:
-            if len(possible_blocks) > 0:
-                block_pos = choice(possible_blocks)
-            else:
-                # No valid positions, to place blocks, emergency abort!
-                continue
+            if find_shortest_path()[1] < min_length:
+                raise InvalidMapError("Solution path too short.")
 
-            blocked_squares = {block_pos}
-            solutions = solve_pairs(pairs)
-            if solutions is False:
-                continue
+            blocked_squares = set()
+
+            for _ in range(blocks):
+                add_block()
+                solve_pairs()
+
+        except InvalidMapError:
+            # Reject map, retry.
+            continue
         
         # Assuming we reach here, a valid map has been acheived!
+        print(f"Succeded making map after {i+1} attempt(s).")
         break
 
     else:
         print(f"ERR: No valid map found after {retry_count} tries, aborting.")
         return False
     
-    # Now, convert tp correct output format.
-    solutions = [get_path_coordinates(pairs[i][0][0], solutions[i]) if (solutions[i] != False) else False for i in range(pair_count) ]
+    # Now, convert to correct output format.
+    solutions = [
+            get_path_coordinates(pairs[i][0][0], solutions[i]) 
+            if (solutions[i] != False) else False 
+            for i in range(pair_count)
+            ]
 
     def dice_to_dict(dice):
         # (pos, rot) -> {pos: ..., face: ..., angle: ...}
