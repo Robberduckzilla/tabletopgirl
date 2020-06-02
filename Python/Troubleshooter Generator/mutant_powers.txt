@@ -1,0 +1,66 @@
+Absorption: The mutant's body is able to absorb energy.
+Acid Spit: The mutant is able to spit acid.
+Adaptive Metabolism: The mutant's body adapts to it's environment.
+Adhesive Skin: Allows your skin to adhere to surface's.
+Adrenalin Control: The mutant can go all acrobatic, strong and battle crazed.
+Bounce: The mutant makes like a rubber ball.
+Bureaucratic Intuition: Can get a feel for the operation of a bureaucratic process.
+Call Bots: Like having a "dog whistle" for bots.
+Chameleon: Makes the mutant blend in with their environment.
+Charm: Makes people like the mutant more.
+Chromativatiation: These interesting fellows can change the colour of things by touch.
+Clean Slate: With a touch, can clean physical surface's.
+Corrosion: The sweat of these mutants corrodes metal.
+Creeping Madness: These mutants can cause others around them to go mad.
+Cryokinesis: Mutants who are good at making people cold.
+Death Simulation: Mutants with this can play dead.
+Deep Thought: They get to mull a problem over and come out with answers.
+Desolidity: These buggers keep escaping, the walking through walls trick and all.
+Detect Mutant Power: Besides the obvious of waiting for someone to set them on fire, these clones can detect a little more than most.
+Electroshock: Mutants with their own stun guns.
+Empathy: Empathy Mutants can read the emotions of another clone, or try and project their own into another head.
+Energy Field: Very like Absorption, but it DOES block melee, but NOT lasers.
+Enervating Darkness: These mutants throw a black cloud over the day of others, literally. The clouds unnerve and sap the willingness and strength from those inside it, making complex action hard to do.
+Environmental Control: A low end mutant might have endless fun flicking the lights off mentally in the briefing room. A spectacular one might be able to gas a whole canteen of clones.
+Find Location: Almost like having an agreeable, unrestrictive, and fully working PDC.
+Forgettable: These mutants were never here. I've never met one. Have you? I'd remember if I did.
+Gravity Manipulation: He ain't heavy, he's my..oh wait.. he just got crushed. Most odd.
+Growth: So, I heard one tale of an Intsec goon who was picking on this shrimp of an IR. The IR turned out to be bigger than thought, by a good 4 feet. Poor Goon.
+Haze: People and items and voices around the mutant can be seen and heard, but not identified. Bots look like metal blobs.
+Hyperreflexes: These mutants are hard to hit, they can even dodge laser beams!
+Hypersenses: All five of the mutants senses are a good deal better than the norm when in use. Very handy for reading very distant signs.
+Jump!: Easy to pick out of a crowd, these mutants enjoy leaping about like fleas.
+Levitation: Mutants with this can go up in the world. And down.
+Light Control: Handy chaps when you need a little more illumination, or a shadowy corner to hide in.
+Machine Empathy: using this skill may well make the mutant more liked by machines, HAVING this skill is grounds for a very speedy death.
+Magnetize: These mutants can magnetize object near by.
+Matter Eater: These guys eat and digest just about anything.
+Mechanical Intuition: With a little observation, mutants with this power can figure out unfamiliar machines.
+Mental Blast: All living beings close to the mutant may have a headache for a couple of rounds.
+Mind Sense: With the ability to detect the presence of clones in the local area, these poor chaps often feel they're being watched even when they are.
+Polymorphism: Shapeshifting scum. Easy to look like other mutants.
+Pouches: The mutant can open pockets in their skin, hide things in there, and close the pouch back up.
+Psychometry: The ability to touch items, and perceive echoes of it's past.
+Puppeteer: The mutant gets to "remote control" the body parts of another clone, by making the same motion themselves.
+Push Mutant Powers: These guys can increase the affect of another clones power.
+Pyrokinesis: Able to set fire to flammable objects.
+Radioactivity: A few minutes near these people when their power is in use might begin to make you feel sick and dizzy.
+Regeneration: Happy chappies, able to recover lost limbs without needing a docbot.
+Rubbery Bones: Able to squeeze through spaces, and resist impact damage.
+Scream: Breaking glass, shattering objects.. ear drums... and generally being loud.
+Sculpt: Able to mold none living materials with their BARE hands.
+Second Skin: mutants with a second, hidden, internal skin that can harden like bodyarmour when needed.
+Shrinking: Mutants with the ability to become smaller.
+Slippery Skin: Ever tried to catch a greased pig?
+Speed: Perhaps just able to sprint well.. perhaps too well.
+Spikes: Mutants who can grow spikes from various parts of their bodies. Pointy.
+Stasis: Ever felt like you missed something? These mutants are probably to blame. They're able to suspend a nearby object or person briefly in time.
+Stench: When stressed: or sometimes when they want to: these mutants emit a stinky stink that lasts a few rounds.
+Stretchy: The ability to elongate limbs. Fantastic.
+Telekinesis: The ability to move objects by mind alone.
+Teleportation: Clones able to teleport themselves somewhere they can see.
+Toxic Metabolism: After eating toxic materials, Mutants with this can try and poison others by touch.
+Transmutation: able to turn one nearby non-living object into another.
+Uncanny Luck: Mutants with this can alter their luck in a way that affects them.
+Ventriloquist: This enables mutants to project their voice over a distance to either one person, or a small group.
+X-Ray Vision: the old "see through things" trick. Or inside things.
