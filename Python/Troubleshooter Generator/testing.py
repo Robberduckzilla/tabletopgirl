@@ -1,0 +1,1 @@
+print(set(range(2)) ^ {1})
