@@ -1,15 +1,7 @@
 import random
+import os
 
-file_paths = {
-    'Standard Equipment' : 'standard_equipnment.txt',
-    'Additional Equipment' : 'additional_equipment.txt',
-    'Service Group' : 'service_groups.txt',
-    'Mutant Powers' : 'mutant_powers.txt',
-    'Secret Societies' : 'secret_societies.txt',
-    'Secret Skills' : 'secret_skills.txt',
-    'Character Quirks' : 'character_quirks.txt',
-    'Silly Skills' : 'silly_skills.txt'
-    }
+
     
 def roll_initial_stats(attributes,skills):
     stats = {
@@ -93,26 +85,79 @@ def get_full_stats(
     stats_updated = run_stat_roulette(initial_stats, n_rounds=5)
     return stats_updated
 
-# x = get_full_stats(n_characters=3)
 
-def load_configs(
-    file_paths = {
-        'standard_equipnment.txt',
-        'additional_equipment.txt',
-        'service_groups.txt',
-        'mutant_powers.txt',
-        'secret_societies.txt',
-        'secret_skills.txt',
-        'character_quirks.txt',
-        'silly_skills.txt'
-        }
-        ):
-    
+def read_txt_files():
+    all_files = os.listdir()
+    txt_files = [x[:-4] for x in all_files if '.txt' in x]
+    return txt_files
+
+
+def load_configs(files='all'):
+    if files == 'all':
+        files = read_txt_files()
     configs = {}
-    for x in file_paths:
-        name = file_paths[x] - '.txt'
-        with open(file_paths[x],'r') as _file 
-        configs[name] = _file.readlines()
+    for filename in files:
+        with open(filename + '.txt', 'r') as f:
+            configs[filename] = set(x.strip() for x in f.readlines())
+    return configs
+
+
+def fit_out_characters(n_characters):
+    configs = load_configs()
+
+    for i in range(n_characters-1):
+        data = {}
+
+        service_group_full = random.sample(configs['service_groups'], 1).pop()    
+        data['Service Group Name']= service_group_full.split(': ')[0]
+        data['Service Group Description'] = service_group_full.split(': ')[1]
+
+        mutant_power_full = random.sample(configs['mutant_powers'], 1).pop()
+        data['Mutant Power Name']= mutant_power_full.split(': ')[0]
+        data['Mutant Power Description'] = mutant_power_full.split(': ')[1]
+
+        secret_society_full = random.sample(configs['secret_societies'], 1).pop()
+        data['Secret Society Name'] = secret_society_full.split(': ')[0]
+        data['Secret Society Description'] = secret_society_full.split(': ')[1]
+
+        skill_1 = random.sample(configs['secret_skills'], 1).pop()
+        skill_2 = random.sample(configs['secret_skills'], 1).pop()
+        skill_3 = random.sample(configs['silly_skills'], 1).pop()
+        data['Secret Skill 1 Name']         = skill_1.split(': ')[0]
+        data['Secret Skill 1 Description']  = skill_1.split(': ')[1]
+        data['Secret Skill 2 Name']         = skill_2.split(': ')[0]
+        data['Secret Skill 2 Description']  = skill_2.split(': ')[1]
+        data['Secret Skill 3 Name']         = skill_3.split(': ')[0]
+        data['Secret Skill 3 Description']  = skill_3.split(': ')[1]
+        
+        data['Character Quirk'] = random.sample(configs['character_quirks'], 1).pop()
+
+        for i, equip in enumerate(configs['standard_equipment']):
+
+# csv_columns = [
+#     'Base Equipment 1-n',
+#     'Additional Equipment 1-n'
+#     'Violence',
+#     'Brains',
+#     'Chutzpah',
+#     'Mechanics',
+#     'Athletics',
+#     'Guns',
+#     'Melee',
+#     'Throw',
+#     'Science',
+#     'Psychology',
+#     'Bureaucracy',
+#     'Alpha Complex',
+#     'Bluff',
+#     'Charm',
+#     'Intimidate',
+#     'Stealth',
+#     'Operate',
+#     'Engineer',
+#     'Program',
+#     'Demolitions'
+# ]
 
 
 # csv_columns = [
