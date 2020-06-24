@@ -92,37 +92,54 @@ def read_txt_files():
     return txt_files
 
 
+def read_txt_files():
+    all_files = os.listdir()
+    txt_files = [x[:-4] for x in all_files if '.txt' in x]
+    return txt_files
+
+
 def load_configs(files='all'):
     if files == 'all':
         files = read_txt_files()
     configs = {}
     for filename in files:
         with open(filename + '.txt', 'r') as f:
-            configs[filename] = set(x.strip() for x in f.readlines())
+            configs[filename] = list(x.strip() for x in f.readlines() if x.strip()!='')
+            random.shuffle(configs[filename])
     return configs
 
 
-def fit_out_characters(n_characters):
+def assign_characters(n_characters):
+    character_data = {}
+    for i in range(n_characters):
+        character_data['Troubleshooter ' + str(i+1)] = {}
+    return character_data
+
+
+def fit_out_characters(character_data, pair_societies=True):
     configs = load_configs()
-
-    for i in range(n_characters-1):
+    for i, character in enumerate(character_data):
         data = {}
-
-        service_group_full = random.sample(configs['service_groups'], 1).pop()    
+    
+        service_group_full = configs['service_groups'].pop()    
         data['Service Group Name']= service_group_full.split(': ')[0]
         data['Service Group Description'] = service_group_full.split(': ')[1]
 
-        mutant_power_full = random.sample(configs['mutant_powers'], 1).pop()
+        mutant_power_full = configs['mutant_powers'].pop()
         data['Mutant Power Name']= mutant_power_full.split(': ')[0]
         data['Mutant Power Description'] = mutant_power_full.split(': ')[1]
-
-        secret_society_full = random.sample(configs['secret_societies'], 1).pop()
+        
+        if pair_societies:
+            number_of_groups = len(character_data) // 2
+            secret_society_full = configs['secret_societies'][i % number_of_groups]
+        else:
+            secret_society_full = configs['secret_societies'].pop()
         data['Secret Society Name'] = secret_society_full.split(': ')[0]
         data['Secret Society Description'] = secret_society_full.split(': ')[1]
 
-        skill_1 = random.sample(configs['secret_skills'], 1).pop()
-        skill_2 = random.sample(configs['secret_skills'], 1).pop()
-        skill_3 = random.sample(configs['silly_skills'], 1).pop()
+        skill_1 = configs['secret_skills'].pop()
+        skill_2 = configs['secret_skills'].pop()
+        skill_3 = configs['silly_skills'].pop()
         data['Secret Skill 1 Name']         = skill_1.split(': ')[0]
         data['Secret Skill 1 Description']  = skill_1.split(': ')[1]
         data['Secret Skill 2 Name']         = skill_2.split(': ')[0]
@@ -130,9 +147,19 @@ def fit_out_characters(n_characters):
         data['Secret Skill 3 Name']         = skill_3.split(': ')[0]
         data['Secret Skill 3 Description']  = skill_3.split(': ')[1]
         
-        data['Character Quirk'] = random.sample(configs['character_quirks'], 1).pop()
-
+        data['Character Quirk 1'] = configs['character_quirks'].pop()
+        data['Character Quirk 2'] = configs['character_quirks'].pop()
+        data['Character Quirk 3'] = configs['character_quirks'].pop()
+        
+        total_standard_equipment = len(configs['standard_equipment'])
         for i, equip in enumerate(configs['standard_equipment']):
+            data['Standard Equipment ' + str(i+1)] = equip
+        
+        data['Additional Equipment 1'] = configs['additional_equipment'].pop()
+        data['Additional Equipment 2'] = configs['additional_equipment'].pop()
+        data['Additional Equipment 3'] = configs['additional_equipment'].pop()
+        
+
 
 # csv_columns = [
 #     'Base Equipment 1-n',
