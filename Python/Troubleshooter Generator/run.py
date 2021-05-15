@@ -92,12 +92,6 @@ def read_txt_files():
     return txt_files
 
 
-def read_txt_files():
-    all_files = os.listdir()
-    txt_files = [x[:-4] for x in all_files if '.txt' in x]
-    return txt_files
-
-
 def load_configs(files='all'):
     if files == 'all':
         files = read_txt_files()
@@ -118,7 +112,7 @@ def assign_characters(n_characters):
 
 def fit_out_characters(character_data, pair_societies=True):
     configs = load_configs()
-    for i, character in enumerate(character_data):
+    for i, _ in enumerate(character_data):
         data = {}
     
         service_group_full = configs['service_groups'].pop()    
